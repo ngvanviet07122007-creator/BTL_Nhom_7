@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogHub - Trung Tâm Quản Trị</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+        <div class="container py-2">
+            <div>
+                <a class="navbar-brand fs-3 mb-0" href="#">BlogHub <span class="badge badge-admin">Admin</span></a>
+                <div class="text-muted small">Hệ thống quản trị dữ liệu</div>
+            </div>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link px-3" href="index.html">Public</a>
+                <a class="nav-link active px-3 text-primary fw-bold border-bottom border-2 border-primary" href="admin.html">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold m-0 text-dark">Quản Lý Danh Sách Bài Viết</h2>
+                <p class="text-muted small m-0">Tạo mới, chỉnh sửa, lưu nháp hoặc xóa bỏ các bài đăng trên hệ thống</p>
+            </div>
+            <div class="d-flex gap-2">
+                <button id="btnOpenCmtManager" class="btn btn-outline-secondary px-3 position-relative rounded-3">
+                    <i class="bi bi-chat-dots-fill"></i> Quản lý bình luận
+                    <span id="adminCommentBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                </button>
+                <button id="btnOpenAddModal" class="btn btn-primary px-3 rounded-3">
+                    <i class="bi bi-plus-circle-fill"></i> Viết bài mới
+                </button>
+            </div>
+        </div>
+
+        <div id="adminSpinner" class="text-center my-5" style="display:none;">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2 small">Đang xử lý đồng bộ danh sách dữ liệu...</p>
+        </div>
+
+        <div id="adminPostList" class="d-flex flex-column gap-3"></div>
+    </div>
+
+    <div class="modal fade" id="blogModal" data-bs-backdrop="static" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="blogModalLabel">Soạn Thảo Bài Viết Mới</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="adminBlogForm">
+                        <input type="hidden" id="formPostId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">Tiêu đề bài viết *</label>
+                            <input type="text" id="formTitle" class="form-control" placeholder="Nhập tiêu đề hấp dẫn cho bài viết...">
+                            <div class="invalid-feedback">Tiêu đề bài viết bắt buộc nhập và không để trống.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">Mô tả ngắn (Description)</label>
+                            <input type="text" id="formDescription" class="form-control" placeholder="Tóm tắt ngắn gọn nội dung hiển thị ở trang chủ...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">Đường dẫn ảnh bìa (Image URL) *</label>
+                            <input type="text" id="formImage" class="form-control" placeholder="Dán link ảnh bìa (https://...)">
+                            <div class="invalid-feedback">Đường dẫn hình ảnh minh họa bài viết bắt buộc phải nhập.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium d-block">Gắn nhãn phân loại (Tags) *</label>
+                            <div id="formTagsContainer" class="d-flex flex-wrap gap-3 border p-3 rounded-3 bg-light"></div>
+                            <div id="tagError" class="text-danger small mt-1" style="display:none;">Bạn phải gắn ít nhất 1 thẻ nhãn nhãn phân loại danh mục.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-medium">Nội dung chi tiết bài viết *</label>
+                            <textarea id="formContent" class="form-control" rows="8" placeholder="Viết nội dung bài đăng đầy đủ ở đây..."></textarea>
+                            <div class="invalid-feedback">Nội dung bài viết bắt buộc nhập và không được bỏ trống.</div>
+                        </div>
+
+                        <div class="form-check form-switch mb-2 mt-3">
+                            <input class="form-check-input" type="checkbox" id="formPublished" checked>
+                            <label class="form-check-label fw-medium text-dark" for="formPublished">Xuất bản công khai bài viết ngay lập tức</label>
+                        </div>
+                        <div class="text-muted small mb-3">Nếu tắt tùy chọn này bài viết sẽ được lưu dưới dạng Bản nháp và không xuất hiện ở trang ngoài.</div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-top p-3">
+                    <button type="button" class="btn btn-outline-secondary px-4 rounded-3" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="button" id="btnSubmitForm" class="btn btn-primary px-4 rounded-3"><i class="bi bi-save2-fill"></i> Lưu thông tin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="commentManagerModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-chat-dots"></i> Danh sách quản lý bình luận độc giả</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" style="max-height:400px; overflow-y:auto;">
+                    <table class="table align-middle table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 20%">Người gửi</th>
+                                <th style="width: 65%">Nội dung ý kiến</th>
+                                <th style="width: 15%" class="text-center">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminCommentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
